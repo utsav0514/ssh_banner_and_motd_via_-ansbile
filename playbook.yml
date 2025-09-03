@@ -1,0 +1,29 @@
+---
+- name: Adding SSH banner and MOTD
+  hosts: slave
+  become: yes
+  tasks:
+    - name: Adding MOTD file
+      copy:
+        content: "This {{ ansible_distribution }} is managed by ansible_control node vagrant_web1"
+        dest: /etc/motd
+
+    - name: Adding SSH banner file
+      copy:
+        src: banner.txt
+        dest: /etc/banner.txt
+    
+    - name: updating ssh config for ssh banner 
+      lineinfile: 
+        path: /etc/ssh/sshd_config
+        regexp: "#Banner none"
+        line: "Banner /etc/banner.txt"
+        backup: yes 
+
+    - name: Restarting the ssh service 
+      service:
+        name: ssh
+        state: restarted 
+      when: ansible_distribution == "Ubuntu"  
+
+
